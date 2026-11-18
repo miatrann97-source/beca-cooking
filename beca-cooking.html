@@ -56,8 +56,46 @@
   .step-title{font-size:24px;font-weight:900;text-align:center;margin:4px 0 0;}
   .step-en{text-align:center;font-size:13px;color:var(--brown);margin:2px 0 4px;}
   .hint{text-align:center;font-size:15px;color:#6B4A35;margin:6px 0 12px;min-height:22px;}
-  .step-img-wrap{border-radius:20px;overflow:hidden;margin:10px 0 12px;box-shadow:0 6px 18px rgba(74,50,38,.18);background:var(--cream2);}
-  .step-img-wrap img{width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;display:block;}
+  .step-img-wrap{position:relative;border-radius:20px;overflow:hidden;margin:10px 0 12px;box-shadow:0 6px 18px rgba(74,50,38,.18);background:var(--cream2);will-change:transform;}
+  .step-img-wrap img{width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;display:block;will-change:transform;}
+  /* --- Gentle step-image motion: slow, small, smooth; kind to sensitive eyes. --- */
+  .step-img-wrap.motion-bob{animation:anim-bob 2.6s ease-in-out infinite;}
+  .step-img-wrap.motion-swirl{animation:anim-swirl 3.2s ease-in-out infinite;}
+  .step-img-wrap.motion-grate{animation:anim-grate 1s ease-in-out infinite;}
+  .step-img-wrap.motion-fall{animation:anim-fall 2.4s ease-in-out infinite;}
+  .step-img-wrap.motion-sizzle{animation:anim-sizzle 1.6s ease-in-out infinite;}
+  .step-img-wrap.motion-slice{animation:anim-slice 1.4s ease-in-out infinite;}
+  .step-img-wrap.motion-tilt{animation:anim-tilt 2.8s ease-in-out infinite;}
+  .step-img-wrap.motion-lift{animation:anim-lift 2.4s ease-in-out infinite;}
+  @keyframes anim-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  @keyframes anim-swirl{0%,100%{transform:translate(0,0) rotate(0deg)}25%{transform:translate(3px,-3px) rotate(.7deg)}50%{transform:translate(0,-4px) rotate(0deg)}75%{transform:translate(-3px,-2px) rotate(-.7deg)}}
+  @keyframes anim-grate{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  @keyframes anim-fall{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  @keyframes anim-sizzle{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.015) translateY(-2px)}}
+  @keyframes anim-slice{0%,100%{transform:translateX(0)}25%{transform:translateX(5px)}75%{transform:translateX(-5px)}}
+  @keyframes anim-tilt{0%,100%{transform:rotate(0deg)}30%{transform:rotate(2.5deg)}70%{transform:rotate(-2deg)}}
+  @keyframes anim-lift{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.01)}}
+  /* Decorative overlays inside the step image (pure CSS, pointer-transparent) */
+  .fx{position:absolute;inset:0;pointer-events:none;display:none;overflow:hidden;}
+  .fx span{position:absolute;display:block;border-radius:50%;}
+  #fx-steam span{width:26px;height:26px;background:rgba(255,255,255,.75);filter:blur(6px);top:26%;opacity:0;animation:steam-rise 3s ease-in-out infinite;}
+  #fx-steam span:nth-child(1){left:38%;}
+  #fx-steam span:nth-child(2){left:52%;animation-delay:1s;}
+  #fx-steam span:nth-child(3){left:63%;animation-delay:2s;}
+  @keyframes steam-rise{0%{transform:translateY(10px) scale(.8);opacity:0}30%{opacity:.55}100%{transform:translateY(-52px) scale(1.25);opacity:0}}
+  #fx-dots span{width:8px;height:8px;top:-12px;opacity:0;animation:dot-fall 2.4s linear infinite;}
+  #fx-dots span:nth-child(1){left:22%;animation-delay:0s;}
+  #fx-dots span:nth-child(2){left:38%;animation-delay:.48s;}
+  #fx-dots span:nth-child(3){left:52%;animation-delay:.96s;}
+  #fx-dots span:nth-child(4){left:66%;animation-delay:1.44s;}
+  #fx-dots span:nth-child(5){left:80%;animation-delay:1.92s;}
+  #fx-dots.herbs span{background:#7CB342;}
+  #fx-dots.sauce span{background:#E85D3D;}
+  @keyframes dot-fall{0%{transform:translateY(0);opacity:0}15%{opacity:.9}85%{opacity:.9}100%{transform:translateY(300px);opacity:0}}
+  @media (prefers-reduced-motion: reduce){
+    .step-img-wrap[class*="motion-"]{animation:none;}
+    .fx span{animation:none;}
+  }
   .mg{display:none;background:var(--card);border-radius:20px;padding:18px 14px;box-shadow:0 4px 14px rgba(74,50,38,.10);}
   .mg.active{display:block;}
   .mg-label{text-align:center;font-weight:800;font-size:15px;color:var(--brown);margin-bottom:10px;}
@@ -138,7 +176,7 @@
     <div class="step-title" id="step-title">Bước 1</div>
     <div class="step-en" id="step-en"></div>
     <div class="hint" id="step-hint"></div>
-    <div class="step-img-wrap"><img id="step-img" src="art/step-01-boil.webp" alt="Bé cá đang nấu ăn"></div>
+    <div class="step-img-wrap" id="step-img-wrap"><img id="step-img" src="art/step-01-boil.webp" alt="Bé cá đang nấu ăn"><div class="fx" id="fx-steam" aria-hidden="true"><span></span><span></span><span></span></div><div class="fx" id="fx-dots" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div></div>
 
     <!-- Minigame: TAP RAPIDLY -->
     <div class="mg" id="mg-mash">
@@ -212,17 +250,17 @@ const DISHES = {
     id: "alfredo", name: "Mì Ý Alfredo", en: "Alfredo Pasta",
     img: "art/dish-alfredo.webp", steps: 6,
     list: [
-      { name: "Đun nước sôi", img: "art/step-01-boil.webp", en: "Boil water", type: "timing",
+      { name: "Đun nước sôi", img: "art/step-01-boil.webp", en: "Boil water", type: "timing", motion: "bob", fx: "steam",
         hint: "Bấm khi kim vào vùng xanh để rót nước! / Tap when the marker is in the green!" },
-      { name: "Thả mì", img: "art/step-02-pasta.webp", en: "Add pasta", type: "mash", taps: 8, time: 8,
+      { name: "Thả mì", img: "art/step-02-pasta.webp", en: "Add pasta", type: "mash", taps: 8, time: 8, motion: "fall",
         hint: "Bấm nhanh để thả mì vào nồi! / Tap fast to drop the pasta in!" },
-      { name: "Khuấy mì", img: "art/step-03-stir.webp", en: "Stir pasta", type: "stir", rotations: 5, time: 12,
+      { name: "Khuấy mì", img: "art/step-03-stir.webp", en: "Stir pasta", type: "stir", rotations: 5, time: 12, motion: "swirl",
         hint: "Kéo tròn trong nồi để khuấy mì! / Drag in circles to stir!" },
-      { name: "Bào phô mai", img: "art/step-04-grate.webp", en: "Grate parmesan", type: "mash", taps: 20, time: 8,
+      { name: "Bào phô mai", img: "art/step-04-grate.webp", en: "Grate parmesan", type: "mash", taps: 20, time: 8, motion: "grate",
         hint: "Bấm nhanh để bào phô mai! / Tap fast to grate the cheese!" },
-      { name: "Rắc rau thơm", img: "art/step-05-sprinkle.webp", en: "Sprinkle herbs", type: "mash", taps: 12, time: 8,
+      { name: "Rắc rau thơm", img: "art/step-05-sprinkle.webp", en: "Sprinkle herbs", type: "mash", taps: 12, time: 8, motion: "fall", fx: "dots", fxColor: "herbs",
         hint: "Bấm nhanh để rắc rau thơm! / Tap fast to sprinkle the herbs!" },
-      { name: "Dọn ra đĩa", img: "art/step-06-serve.webp", en: "Serve", type: "timing",
+      { name: "Dọn ra đĩa", img: "art/step-06-serve.webp", en: "Serve", type: "timing", motion: "lift",
         hint: "Bấm khi kim vào vùng xanh để dọn ra! / Tap in the green to serve!" }
     ]
   },
@@ -230,11 +268,11 @@ const DISHES = {
     id: "matcha", name: "Trà Matcha", en: "Matcha Tea",
     img: "art/dish-matcha.webp", steps: 3,
     list: [
-      { name: "Rót nước nóng", img: "art/step-07-pour-water.webp", en: "Pour hot water", type: "timing",
+      { name: "Rót nước nóng", img: "art/step-07-pour-water.webp", en: "Pour hot water", type: "timing", motion: "tilt",
         hint: "Bấm khi kim vào vùng xanh để rót nước! / Tap when the marker is in the green!" },
-      { name: "Đánh matcha", img: "art/step-08-whisk.webp", en: "Whisk matcha", type: "stir", rotations: 5, time: 12,
+      { name: "Đánh matcha", img: "art/step-08-whisk.webp", en: "Whisk matcha", type: "stir", rotations: 5, time: 12, motion: "swirl",
         hint: "Kéo tròn để đánh matcha sủi bọt! / Drag in circles to whisk!" },
-      { name: "Rót ra chén", img: "art/step-09-pour-bowl.webp", en: "Pour into bowl", type: "timing",
+      { name: "Rót ra chén", img: "art/step-09-pour-bowl.webp", en: "Pour into bowl", type: "timing", motion: "tilt",
         hint: "Bấm khi kim vào vùng xanh để rót ra! / Tap in the green to pour!" }
     ]
   },
@@ -242,13 +280,13 @@ const DISHES = {
     id: "omurice", name: "Cơm Trứng Omurice", en: "Omurice",
     img: "art/dish-omurice.webp", steps: 4,
     list: [
-      { name: "Chiên trứng", img: "art/step-10-fry-egg.webp", en: "Fry egg", type: "timing",
+      { name: "Chiên trứng", img: "art/step-10-fry-egg.webp", en: "Fry egg", type: "timing", motion: "sizzle",
         hint: "Bấm khi kim vào vùng xanh để lật trứng! / Tap in the green to flip!" },
-      { name: "Đặt trứng lên cơm", img: "art/step-11-place-omelet.webp", en: "Place egg on rice", type: "mash", taps: 6, time: 8,
+      { name: "Đặt trứng lên cơm", img: "art/step-11-place-omelet.webp", en: "Place egg on rice", type: "mash", taps: 6, time: 8, motion: "lift",
         hint: "Bấm nhanh để đặt trứng lên cơm! / Tap fast to place the egg!" },
-      { name: "Cắt trứng", img: "art/step-12-cut-omelet.webp", en: "Cut egg open", type: "mash", taps: 15, time: 8,
+      { name: "Cắt trứng", img: "art/step-12-cut-omelet.webp", en: "Cut egg open", type: "mash", taps: 15, time: 8, motion: "slice",
         hint: "Bấm nhanh để cắt trứng cho chảy ra! / Tap fast to cut the egg open!" },
-      { name: "Rưới tương cà", img: "art/step-13-drizzle.webp", en: "Drizzle ketchup", type: "timing",
+      { name: "Rưới tương cà", img: "art/step-13-drizzle.webp", en: "Drizzle ketchup", type: "timing", motion: "fall", fx: "dots", fxColor: "sauce",
         hint: "Bấm khi kim vào vùng xanh để rưới tương! / Tap in the green to drizzle!" }
     ]
   }
@@ -259,6 +297,7 @@ const ORDER = ["alfredo", "matcha", "omurice"];
 let currentDish = null, stepIndex = 0, stepResults = [];
 let dishStart = 0, elapsedTimer = null;
 let mini = null; // {cleanup:fn}
+let imgPulseTimer = null; // gentle tap-bob timer for the step image
 
 /* ================= HELPERS ================= */
 const $ = id => document.getElementById(id);
@@ -315,11 +354,29 @@ function renderStep(){
   $("step-title").textContent = "Bước " + (stepIndex+1) + "/" + total + ": " + step.name;
   $("step-en").textContent = step.en;
   $("step-hint").textContent = step.hint;
-  $("step-img").src = step.img;
-  $("step-img").alt = "Bé cá: " + step.name + " / " + step.en;
+  const img = $("step-img"), wrap = $("step-img-wrap");
+  img.src = step.img;
+  img.alt = "Bé cá: " + step.name + " / " + step.en;
+  // reset any JS-driven image transform + pending tap pulse from the previous step
+  img.style.transform = "";
+  if (imgPulseTimer){ clearTimeout(imgPulseTimer); imgPulseTimer = null; }
+  // gentle idle motion matching this step's action (CSS keyframes, slow + small)
+  wrap.className = "step-img-wrap" + (step.motion ? " motion-" + step.motion : "");
+  // decorative overlays: steam for boiling, falling dots for sprinkle/drizzle
+  $("fx-steam").style.display = step.fx === "steam" ? "block" : "none";
+  const dots = $("fx-dots");
+  dots.style.display = step.fx === "dots" ? "block" : "none";
+  dots.className = "fx" + (step.fxColor ? " " + step.fxColor : "");
   if (step.type === "mash") startMash(step);
   else if (step.type === "timing") startTiming(step);
   else if (step.type === "stir") startStir(step);
+}
+/* Gentle tap bob on the step image (small, 200ms, no shake). Used by mash taps. */
+function pulseStepImg(){
+  const img = $("step-img");
+  img.style.transform = "scale(1.04) translateY(-3px)";
+  if (imgPulseTimer) clearTimeout(imgPulseTimer);
+  imgPulseTimer = setTimeout(() => { img.style.transform = ""; imgPulseTimer = null; }, 200);
 }
 function scoreByTimeLeft(tLeft, threshold){
   return tLeft >= threshold ? "Perfect" : "Good";
@@ -390,6 +447,7 @@ function startMash(step){
   const onTap = (e) => {
     e.preventDefault();
     count++;
+    pulseStepImg();
     $("mash-fill").style.width = Math.min(100, count/step.taps*100) + "%";
     $("mash-count").textContent = count + " / " + step.taps;
     if (count >= step.taps){
@@ -474,6 +532,9 @@ function startStir(step){
     $("stir-fill").style.width = Math.min(100, rots/step.rotations*100) + "%";
     $("stir-count").textContent = Math.floor(rots) + " / " + step.rotations + " vòng";
     ring.style.transform = "rotate(" + (acc*180/Math.PI - 90) + "deg)";
+    // image slowly tilts as you stir (max 18deg, gentle) — separate element from the CSS swirl
+    const tilt = Math.min(18, rots/step.rotations*18);
+    $("step-img").style.transform = "scale(1.08) rotate(" + tilt.toFixed(1) + "deg)";
     if (rots >= step.rotations){
       done = true; clearInterval(iv);
       finishStep(scoreByTimeLeft(timeLeft, 4));
@@ -486,6 +547,7 @@ function startStir(step){
   pot.addEventListener("pointercancel", onUp);
   mini = { cleanup(){
     clearInterval(iv);
+    $("step-img").style.transform = "";
     pot.removeEventListener("pointerdown", onDown);
     pot.removeEventListener("pointermove", onMove);
     pot.removeEventListener("pointerup", onUp);
