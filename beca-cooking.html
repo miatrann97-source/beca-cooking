@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Bé Cá Nấu Ăn — Bé Cá Cooking</title>
+<style>
+  :root{
+    --cream:#FFF6E9; --cream2:#FDEBD0; --ink:#4A3226; --brown:#8B5E3C;
+    --coral:#E85D3D; --coral-dark:#C94A2E; --green:#43A047; --gold:#F5B301;
+    --blue:#5B8DEF; --card:#FFFFFF; --soft:#FFFDF7;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--cream);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+  body{overscroll-behavior:none;}
+  .app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;background:var(--cream);}
+  .screen{display:none;padding:16px 16px 28px;}
+  .screen.active{display:block;}
+  h1{font-size:30px;line-height:1.15;margin:6px 0 2px;text-align:center;color:var(--coral);}
+  h2{font-size:22px;margin:8px 0 4px;}
+  .sub{text-align:center;color:var(--brown);font-size:14px;margin:0 0 10px;}
+  .en{font-size:12px;color:#9A7B66;letter-spacing:.02em;}
+  .hero{width:100%;border-radius:20px;display:block;box-shadow:0 6px 18px rgba(74,50,38,.18);}
+  .hero-wrap{border-radius:20px;overflow:hidden;margin:10px 0 14px;}
+  .card{background:var(--card);border-radius:18px;padding:14px;box-shadow:0 4px 14px rgba(74,50,38,.10);margin-bottom:12px;}
+  .btn{display:block;width:100%;border:0;border-radius:16px;padding:16px 14px;font-size:19px;font-weight:800;
+    cursor:pointer;color:#fff;background:var(--coral);box-shadow:0 4px 0 var(--coral-dark);}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--coral-dark);}
+  .btn.green{background:var(--green);box-shadow:0 4px 0 #2E7D32;}
+  .btn.green:active{box-shadow:0 1px 0 #2E7D32;}
+  .btn.blue{background:var(--blue);box-shadow:0 4px 0 #3D6BC4;}
+  .btn.blue:active{box-shadow:0 1px 0 #3D6BC4;}
+  .btn.ghost{background:#fff;color:var(--brown);box-shadow:0 4px 0 #E3CDB2;border:2px solid #EFD9BE;}
+  .btn.small{font-size:16px;padding:12px;}
+  .btn:disabled{opacity:.55;cursor:default;}
+  .row{display:flex;gap:10px;}
+  .row .btn{flex:1;}
+  /* Dish select */
+  .dish-card{display:flex;gap:12px;align-items:center;background:var(--card);border-radius:18px;
+    padding:12px;box-shadow:0 4px 14px rgba(74,50,38,.10);margin-bottom:12px;cursor:pointer;border:3px solid transparent;}
+  .dish-card:active{border-color:var(--coral);}
+  .dish-card img{width:96px;height:96px;object-fit:cover;border-radius:14px;flex:0 0 96px;background:var(--cream2);}
+  .dish-card .name{font-size:19px;font-weight:800;}
+  .dish-card .meta{font-size:13px;color:var(--brown);margin-top:3px;}
+  .dish-card .go{margin-left:auto;font-size:26px;color:var(--coral);font-weight:900;}
+  /* Cook screen */
+  .cook-bg{position:relative;border-radius:20px;overflow:hidden;margin-bottom:12px;}
+  .cook-bg img{width:100%;display:block;}
+  .cook-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,246,233,0) 55%,rgba(255,246,233,.92));}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0 10px;}
+  .pill{background:#fff;border-radius:999px;padding:6px 12px;font-size:14px;font-weight:700;box-shadow:0 2px 8px rgba(74,50,38,.10);}
+  .pill.timer{font-variant-numeric:tabular-nums;}
+  .progress{height:12px;background:#F0DFC6;border-radius:999px;overflow:hidden;margin:0 0 12px;}
+  .progress > div{height:100%;background:linear-gradient(90deg,#FFB74D,var(--coral));border-radius:999px;transition:width .3s ease;}
+  .step-title{font-size:24px;font-weight:900;text-align:center;margin:4px 0 0;}
+  .step-en{text-align:center;font-size:13px;color:var(--brown);margin:2px 0 4px;}
+  .hint{text-align:center;font-size:15px;color:#6B4A35;margin:6px 0 12px;min-height:22px;}
+  .mg{display:none;background:var(--card);border-radius:20px;padding:18px 14px;box-shadow:0 4px 14px rgba(74,50,38,.10);}
+  .mg.active{display:block;}
+  .mg-label{text-align:center;font-weight:800;font-size:15px;color:var(--brown);margin-bottom:10px;}
+  .countdown{font-size:44px;font-weight:900;text-align:center;font-variant-numeric:tabular-nums;color:var(--coral);line-height:1;}
+  .countdown.low{color:#D32F2F;}
+  .bar{height:18px;background:#F0DFC6;border-radius:999px;overflow:hidden;margin:12px 0;}
+  .bar > div{height:100%;background:linear-gradient(90deg,#81C784,var(--green));border-radius:999px;transition:width .12s linear;}
+  .mash-btn{width:170px;height:170px;border-radius:50%;margin:6px auto 4px;display:flex;align-items:center;justify-content:center;
+    font-size:22px;font-weight:900;color:#fff;background:radial-gradient(circle at 35% 30%,#FF8A65,var(--coral) 60%,#C94A2E);
+    border:0;cursor:pointer;box-shadow:0 8px 0 #A63E26,0 12px 22px rgba(74,50,38,.25);touch-action:none;user-select:none;}
+  .mash-btn:active{transform:translateY(5px) scale(.97);box-shadow:0 3px 0 #A63E26;}
+  .tap-count{text-align:center;font-size:16px;font-weight:800;color:var(--brown);}
+  /* Timing bar */
+  .track{position:relative;height:34px;background:#F0DFC6;border-radius:999px;margin:18px 4px 8px;overflow:hidden;}
+  .zone-green{position:absolute;top:0;bottom:0;background:#A5D6A7;}
+  .zone-gold{position:absolute;top:0;bottom:0;background:#FFD54F;}
+  .marker{position:absolute;top:-4px;bottom:-4px;width:8px;margin-left:-4px;background:#D32F2F;border-radius:4px;
+    box-shadow:0 0 0 2px #fff;}
+  .timing-btn{margin-top:14px;}
+  .zone-legend{text-align:center;font-size:13px;color:var(--brown);}
+  .zone-legend b{color:#2E7D32;} .zone-legend .g{color:#B8860B;}
+  /* Stir */
+  .pot-wrap{position:relative;width:250px;height:250px;margin:4px auto;border-radius:50%;
+    background:radial-gradient(circle at 50% 42%,#FFE0B2,#FFCC80 55%,#E8A85C);border:6px solid #8D6E63;
+    touch-action:none;user-select:none;box-shadow:inset 0 6px 18px rgba(0,0,0,.15);}
+  .pot-inner{position:absolute;inset:26px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#FFF3E0,#FFE0B2);
+    display:flex;align-items:center;justify-content:center;text-align:center;}
+  .pot-inner .big{font-size:44px;line-height:1;}
+  .pot-inner .txt{font-size:13px;font-weight:800;color:#8D6E63;margin-top:2px;}
+  .ring{position:absolute;inset:-6px;border-radius:50%;border:6px solid transparent;border-top-color:var(--green);
+    transform:rotate(-90deg);pointer-events:none;}
+  .stir-count{text-align:center;font-size:16px;font-weight:800;color:var(--brown);margin-top:8px;}
+  /* Step result popup */
+  .overlay{position:fixed;inset:0;background:rgba(74,50,38,.45);display:none;align-items:center;justify-content:center;
+    padding:20px;z-index:50;}
+  .overlay.show{display:flex;}
+  .pop{background:#fff;border-radius:22px;max-width:400px;width:100%;padding:22px 18px;text-align:center;
+    box-shadow:0 14px 40px rgba(0,0,0,.25);animation:popin .18s ease;}
+  @keyframes popin{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
+  .pop .emoji{font-size:52px;line-height:1;}
+  .pop h2{margin:6px 0 2px;}
+  .pop p{margin:4px 0 14px;color:var(--brown);font-size:15px;}
+  /* Result screen */
+  .medal{font-size:56px;text-align:center;line-height:1.1;}
+  .medal-name{text-align:center;font-size:26px;font-weight:900;color:#B8860B;margin:2px 0 6px;}
+  .dish-img{width:100%;border-radius:18px;display:block;background:var(--cream2);}
+  .steps-list{margin:10px 0;}
+  .steps-list .srow{display:flex;justify-content:space-between;padding:9px 2px;border-bottom:1px dashed #EFD9BE;font-size:15px;}
+  .steps-list .srow:last-child{border-bottom:0;}
+  .badge{font-weight:900;}
+  .badge.perfect{color:#B8860B;} .badge.good{color:var(--green);}
+  .foot{text-align:center;font-size:12px;color:#B49A83;margin-top:14px;}
+  .back-link{background:none;border:0;color:var(--brown);font-size:15px;font-weight:700;cursor:pointer;padding:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SCREEN: DISH SELECT ============ -->
+  <section class="screen active" id="screen-select">
+    <h1>🐟 Bé Cá Nấu Ăn</h1>
+    <p class="sub">Bé Cá Cooking <span class="en">• Cooking Mama style</span></p>
+    <div class="hero-wrap"><img class="hero" src="art/beca-cooking.webp" alt="Bé cá đang nấu ăn trong bếp"></div>
+    <p class="sub">Chọn một món để nấu nha! <span class="en">Pick a dish to cook!</span></p>
+    <div id="dish-list"></div>
+    <p class="foot">Mỗi bước là một trò chơi nhỏ — bấm nhanh, bấm đúng lúc, hoặc khuấy tròn.<br>
+    <span class="en">Every step is a tiny minigame — mash, time it, or stir in circles.</span></p>
+  </section>
+
+  <!-- ============ SCREEN: COOKING ============ -->
+  <section class="screen" id="screen-cook">
+    <div class="topbar">
+      <button class="back-link" id="btn-quit" type="button">‹ Menu</button>
+      <span class="pill" id="cook-dish-name">Món ăn</span>
+      <span class="pill timer" id="cook-timer">00:00</span>
+    </div>
+    <div class="progress"><div id="cook-progress" style="width:0%"></div></div>
+    <div class="step-title" id="step-title">Bước 1</div>
+    <div class="step-en" id="step-en"></div>
+    <div class="hint" id="step-hint"></div>
+
+    <!-- Minigame: TAP RAPIDLY -->
+    <div class="mg" id="mg-mash">
+      <div class="mg-label">Bấm thật nhanh! <span class="en">Tap fast!</span></div>
+      <div class="countdown" id="mash-time">8</div>
+      <div class="bar"><div id="mash-fill" style="width:0%"></div></div>
+      <button class="mash-btn" id="mash-btn" type="button">BẤM!<br><span style="font-size:14px;font-weight:700;">TAP!</span></button>
+      <div class="tap-count" id="mash-count">0 / 20</div>
+    </div>
+
+    <!-- Minigame: TIMING BAR -->
+    <div class="mg" id="mg-timing">
+      <div class="mg-label">Bấm khi kim vào vùng xanh! <span class="en">Tap in the green!</span></div>
+      <div class="track" id="timing-track">
+        <div class="zone-green" id="zone-green"></div>
+        <div class="zone-gold" id="zone-gold"></div>
+        <div class="marker" id="timing-marker" style="left:0%"></div>
+      </div>
+      <div class="zone-legend"><b>■ Xanh lá = Tốt (Good)</b> &nbsp; <span class="g">■ Vàng = Hoàn hảo (Perfect)</span></div>
+      <button class="btn timing-btn" id="timing-btn" type="button">BẤM! / TAP!</button>
+    </div>
+
+    <!-- Minigame: STIR IN CIRCLES -->
+    <div class="mg" id="mg-stir">
+      <div class="mg-label">Khuấy tròn trong nồi! <span class="en">Stir in circles!</span></div>
+      <div class="countdown" id="stir-time">10</div>
+      <div class="pot-wrap" id="pot-wrap">
+        <div class="ring" id="stir-ring"></div>
+        <div class="pot-inner"><div><div class="big">🥣</div><div class="txt">KÉO TRÒN<br>DRAG IN CIRCLES</div></div></div>
+      </div>
+      <div class="bar"><div id="stir-fill" style="width:0%"></div></div>
+      <div class="stir-count" id="stir-count">0 / 5 vòng</div>
+    </div>
+
+    <div class="cook-bg" style="margin-top:12px;"><img src="art/kitchen-bg.webp" alt="Bếp của bé cá"></div>
+  </section>
+
+  <!-- ============ SCREEN: DISH COMPLETE ============ -->
+  <section class="screen" id="screen-result">
+    <h1>Xong rồi! 🎉</h1>
+    <p class="sub">Dish complete! <span class="en">Ngon quá đi!</span></p>
+    <div class="medal" id="result-medal">🥇</div>
+    <div class="medal-name" id="result-medal-name">Huy chương Vàng</div>
+    <div class="card" style="padding:10px;"><img class="dish-img" id="result-dish-img" src="" alt="Món ăn đã hoàn thành"></div>
+    <div class="card">
+      <div class="steps-list" id="result-steps"></div>
+      <div class="steps-list"><div class="srow"><span>⏱ Thời gian / Time</span><b id="result-time">00:00</b></div></div>
+    </div>
+    <div class="row">
+      <button class="btn green" id="btn-replay" type="button">Chơi lại<br><span style="font-size:13px;">Play again</span></button>
+      <button class="btn" id="btn-menu" type="button">Món khác<br><span style="font-size:13px;">Other dish</span></button>
+    </div>
+  </section>
+
+  <!-- ============ STEP RESULT POPUP ============ -->
+  <div class="overlay" id="overlay">
+    <div class="pop">
+      <div class="emoji" id="pop-emoji">⭐</div>
+      <h2 id="pop-title">Hoàn hảo!</h2>
+      <p id="pop-sub">Perfect!</p>
+      <button class="btn" id="pop-btn" type="button">Tiếp tục / Continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================= DATA ================= */
+const DISHES = {
+  alfredo: {
+    id: "alfredo", name: "Mì Ý Alfredo", en: "Alfredo Pasta",
+    img: "art/dish-alfredo.webp", steps: 6,
+    list: [
+      { name: "Đun nước sôi", en: "Boil water", type: "timing",
+        hint: "Bấm khi kim vào vùng xanh để rót nước! / Tap when the marker is in the green!" },
+      { name: "Thả mì", en: "Add pasta", type: "mash", taps: 8, time: 8,
+        hint: "Bấm nhanh để thả mì vào nồi! / Tap fast to drop the pasta in!" },
+      { name: "Khuấy mì", en: "Stir pasta", type: "stir", rotations: 5, time: 12,
+        hint: "Kéo tròn trong nồi để khuấy mì! / Drag in circles to stir!" },
+      { name: "Bào phô mai", en: "Grate parmesan", type: "mash", taps: 20, time: 8,
+        hint: "Bấm nhanh để bào phô mai! / Tap fast to grate the cheese!" },
+      { name: "Rắc rau thơm", en: "Sprinkle herbs", type: "mash", taps: 12, time: 8,
+        hint: "Bấm nhanh để rắc rau thơm! / Tap fast to sprinkle the herbs!" },
+      { name: "Dọn ra đĩa", en: "Serve", type: "timing",
+        hint: "Bấm khi kim vào vùng xanh để dọn ra! / Tap in the green to serve!" }
+    ]
+  },
+  matcha: {
+    id: "matcha", name: "Trà Matcha", en: "Matcha Tea",
+    img: "art/dish-matcha.webp", steps: 3,
+    list: [
+      { name: "Rót nước nóng", en: "Pour hot water", type: "timing",
+        hint: "Bấm khi kim vào vùng xanh để rót nước! / Tap when the marker is in the green!" },
+      { name: "Đánh matcha", en: "Whisk matcha", type: "stir", rotations: 5, time: 12,
+        hint: "Kéo tròn để đánh matcha sủi bọt! / Drag in circles to whisk!" },
+      { name: "Rót ra chén", en: "Pour into bowl", type: "timing",
+        hint: "Bấm khi kim vào vùng xanh để rót ra! / Tap in the green to pour!" }
+    ]
+  },
+  omurice: {
+    id: "omurice", name: "Cơm Trứng Omurice", en: "Omurice",
+    img: "art/dish-omurice.webp", steps: 4,
+    list: [
+      { name: "Chiên trứng", en: "Fry egg", type: "timing",
+        hint: "Bấm khi kim vào vùng xanh để lật trứng! / Tap in the green to flip!" },
+      { name: "Đặt trứng lên cơm", en: "Place egg on rice", type: "mash", taps: 6, time: 8,
+        hint: "Bấm nhanh để đặt trứng lên cơm! / Tap fast to place the egg!" },
+      { name: "Cắt trứng", en: "Cut egg open", type: "mash", taps: 15, time: 8,
+        hint: "Bấm nhanh để cắt trứng cho chảy ra! / Tap fast to cut the egg open!" },
+      { name: "Rưới tương cà", en: "Drizzle ketchup", type: "timing",
+        hint: "Bấm khi kim vào vùng xanh để rưới tương! / Tap in the green to drizzle!" }
+    ]
+  }
+};
+const ORDER = ["alfredo", "matcha", "omurice"];
+
+/* ================= STATE ================= */
+let currentDish = null, stepIndex = 0, stepResults = [];
+let dishStart = 0, elapsedTimer = null;
+let mini = null; // {cleanup:fn}
+
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+function fmtTime(sec){ sec = Math.max(0, Math.floor(sec)); return String(Math.floor(sec/60)).padStart(2,"0") + ":" + String(sec%60).padStart(2,"0"); }
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+function stopMini(){
+  if (mini && mini.cleanup) { try{ mini.cleanup(); }catch(e){} }
+  mini = null;
+  document.querySelectorAll(".mg").forEach(m => m.classList.remove("active"));
+}
+function stopElapsed(){ if (elapsedTimer){ clearInterval(elapsedTimer); elapsedTimer = null; } }
+
+/* ================= SELECT SCREEN ================= */
+function renderSelect(){
+  const list = $("dish-list");
+  list.innerHTML = "";
+  ORDER.forEach(id => {
+    const d = DISHES[id];
+    const card = document.createElement("div");
+    card.className = "dish-card";
+    card.innerHTML =
+      '<img src="' + d.img + '" alt="' + d.name + '">' +
+      '<div><div class="name">' + d.name + '</div>' +
+      '<div class="meta">' + d.en + ' • ' + d.steps + ' bước / steps</div></div>' +
+      '<div class="go">›</div>';
+    card.addEventListener("click", () => startDish(id));
+    list.appendChild(card);
+  });
+}
+
+/* ================= COOK FLOW ================= */
+function startDish(id){
+  stopMini(); stopElapsed();
+  currentDish = DISHES[id];
+  stepIndex = 0; stepResults = [];
+  $("cook-dish-name").textContent = currentDish.name;
+  dishStart = Date.now();
+  $("cook-timer").textContent = "00:00";
+  elapsedTimer = setInterval(() => {
+    $("cook-timer").textContent = fmtTime((Date.now() - dishStart)/1000);
+  }, 500);
+  showScreen("screen-cook");
+  renderStep();
+}
+function renderStep(){
+  stopMini();
+  const step = currentDish.list[stepIndex];
+  const total = currentDish.list.length;
+  $("cook-progress").style.width = (stepIndex/total*100) + "%";
+  $("step-title").textContent = "Bước " + (stepIndex+1) + "/" + total + ": " + step.name;
+  $("step-en").textContent = step.en;
+  $("step-hint").textContent = step.hint;
+  if (step.type === "mash") startMash(step);
+  else if (step.type === "timing") startTiming(step);
+  else if (step.type === "stir") startStir(step);
+}
+function scoreByTimeLeft(tLeft, threshold){
+  return tLeft >= threshold ? "Perfect" : "Good";
+}
+function finishStep(result){
+  stopMini();
+  const isRetry = (result === "Try Again");
+  const pop = $("overlay"), emoji = $("pop-emoji"), title = $("pop-title"),
+        sub = $("pop-sub"), btn = $("pop-btn");
+  if (result === "Perfect"){ emoji.textContent = "⭐"; title.textContent = "Hoàn hảo!"; sub.textContent = "Perfect! Bé cá khen bạn giỏi quá!"; }
+  else if (result === "Good"){ emoji.textContent = "👍"; title.textContent = "Tốt lắm!"; sub.textContent = "Good! Ngon rồi đó!"; }
+  else { emoji.textContent = "💪"; title.textContent = "Thử lại nha!"; sub.textContent = "Try again — chưa đủ, làm lại bước này!"; }
+  btn.textContent = isRetry ? "Làm lại / Retry" : "Tiếp tục / Continue";
+  pop.classList.add("show");
+  btn.onclick = () => {
+    pop.classList.remove("show");
+    if (isRetry){ renderStep(); }
+    else {
+      stepResults[stepIndex] = result;
+      stepIndex++;
+      if (stepIndex < currentDish.list.length){ renderStep(); }
+      else { finishDish(); }
+    }
+  };
+}
+function finishDish(){
+  stopMini(); stopElapsed();
+  const totalSec = (Date.now() - dishStart)/1000;
+  const perfects = stepResults.filter(r => r === "Perfect").length;
+  const total = currentDish.list.length;
+  let medal = "🥉", medalName = "Huy chương Đồng", medalEn = "Bronze Medal";
+  if (perfects === total){ medal = "🥇"; medalName = "Huy chương Vàng"; medalEn = "Gold Medal"; }
+  else if (perfects >= Math.ceil(total/2)){ medal = "🥈"; medalName = "Huy chương Bạc"; medalEn = "Silver Medal"; }
+  $("result-medal").textContent = medal;
+  $("result-medal-name").textContent = medalName + " • " + medalEn;
+  $("result-dish-img").src = currentDish.img;
+  $("result-time").textContent = fmtTime(totalSec);
+  const wrap = $("result-steps");
+  wrap.innerHTML = "";
+  currentDish.list.forEach((s, i) => {
+    const r = stepResults[i] || "Good";
+    const row = document.createElement("div");
+    row.className = "srow";
+    row.innerHTML = "<span>" + (i+1) + ". " + s.name + "</span>" +
+      '<span class="badge ' + (r === "Perfect" ? "perfect" : "good") + '">' +
+      (r === "Perfect" ? "⭐ Hoàn hảo" : "👍 Tốt") + "</span>";
+    wrap.appendChild(row);
+  });
+  showScreen("screen-result");
+}
+
+/* ================= MINIGAME: MASH ================= */
+function startMash(step){
+  $("mg-mash").classList.add("active");
+  let count = 0, timeLeft = step.time;
+  $("mash-fill").style.width = "0%";
+  $("mash-count").textContent = "0 / " + step.taps;
+  const timeEl = $("mash-time");
+  timeEl.textContent = Math.ceil(timeLeft);
+  timeEl.classList.remove("low");
+  const iv = setInterval(() => {
+    timeLeft = Math.max(0, timeLeft - 0.1);
+    timeEl.textContent = Math.ceil(timeLeft);
+    if (timeLeft <= 3) timeEl.classList.add("low");
+    if (timeLeft <= 0){ clearInterval(iv); finishStep("Try Again"); }
+  }, 100);
+  const btn = $("mash-btn");
+  const onTap = (e) => {
+    e.preventDefault();
+    count++;
+    $("mash-fill").style.width = Math.min(100, count/step.taps*100) + "%";
+    $("mash-count").textContent = count + " / " + step.taps;
+    if (count >= step.taps){
+      clearInterval(iv);
+      finishStep(scoreByTimeLeft(timeLeft, 3));
+    }
+  };
+  btn.addEventListener("pointerdown", onTap);
+  mini = { cleanup(){ clearInterval(iv); btn.removeEventListener("pointerdown", onTap); } };
+}
+
+/* ================= MINIGAME: TIMING BAR ================= */
+const ZONE = { green: [32, 68], gold: [45, 55] };
+function startTiming(step){
+  $("mg-timing").classList.add("active");
+  const zg = $("zone-green"), zgo = $("zone-gold"), marker = $("timing-marker");
+  zg.style.left = ZONE.green[0] + "%"; zg.style.width = (ZONE.green[1]-ZONE.green[0]) + "%";
+  zgo.style.left = ZONE.gold[0] + "%"; zgo.style.width = (ZONE.gold[1]-ZONE.gold[0]) + "%";
+  let pos = 0, raf = 0, startT = performance.now();
+  const PERIOD = 2200; // ms for a full 0->100->0 sweep
+  function tick(now){
+    const t = (now - startT) % PERIOD;
+    const ph = t / PERIOD;
+    pos = ph < 0.5 ? ph*2*100 : (1 - (ph-0.5)*2)*100;
+    marker.style.left = pos + "%";
+    raf = requestAnimationFrame(tick);
+  }
+  raf = requestAnimationFrame(tick);
+  const btn = $("timing-btn");
+  const onTap = (e) => {
+    e.preventDefault();
+    cancelAnimationFrame(raf);
+    let result;
+    if (pos >= ZONE.gold[0] && pos <= ZONE.gold[1]) result = "Perfect";
+    else if (pos >= ZONE.green[0] && pos <= ZONE.green[1]) result = "Good";
+    else result = "Try Again";
+    finishStep(result);
+  };
+  btn.addEventListener("pointerdown", onTap);
+  mini = { cleanup(){ cancelAnimationFrame(raf); btn.removeEventListener("pointerdown", onTap); } };
+}
+
+/* ================= MINIGAME: STIR ================= */
+function startStir(step){
+  $("mg-stir").classList.add("active");
+  const pot = $("pot-wrap"), ring = $("stir-ring");
+  let acc = 0, lastAng = null, tracking = false, timeLeft = step.time, done = false;
+  $("stir-fill").style.width = "0%";
+  $("stir-count").textContent = "0 / " + step.rotations + " vòng";
+  const timeEl = $("stir-time");
+  timeEl.textContent = Math.ceil(timeLeft);
+  timeEl.classList.remove("low");
+  const iv = setInterval(() => {
+    timeLeft = Math.max(0, timeLeft - 0.1);
+    timeEl.textContent = Math.ceil(timeLeft);
+    if (timeLeft <= 3) timeEl.classList.add("low");
+    if (timeLeft <= 0 && !done){ done = true; clearInterval(iv); finishStep("Try Again"); }
+  }, 100);
+  function center(){
+    const r = pot.getBoundingClientRect();
+    return { x: r.left + r.width/2, y: r.top + r.height/2 };
+  }
+  function ang(x, y){
+    const c = center();
+    return Math.atan2(y - c.y, x - c.x);
+  }
+  function onDown(e){
+    e.preventDefault();
+    tracking = true;
+    lastAng = ang(e.clientX, e.clientY);
+    try{ pot.setPointerCapture(e.pointerId); }catch(err){}
+  }
+  function onMove(e){
+    if (!tracking || done) return;
+    const a = ang(e.clientX, e.clientY);
+    let d = a - lastAng;
+    while (d > Math.PI) d -= 2*Math.PI;
+    while (d < -Math.PI) d += 2*Math.PI;
+    lastAng = a;
+    acc += Math.abs(d);
+    const rots = acc / (2*Math.PI);
+    $("stir-fill").style.width = Math.min(100, rots/step.rotations*100) + "%";
+    $("stir-count").textContent = Math.floor(rots) + " / " + step.rotations + " vòng";
+    ring.style.transform = "rotate(" + (acc*180/Math.PI - 90) + "deg)";
+    if (rots >= step.rotations){
+      done = true; clearInterval(iv);
+      finishStep(scoreByTimeLeft(timeLeft, 4));
+    }
+  }
+  function onUp(){ tracking = false; lastAng = null; }
+  pot.addEventListener("pointerdown", onDown);
+  pot.addEventListener("pointermove", onMove);
+  pot.addEventListener("pointerup", onUp);
+  pot.addEventListener("pointercancel", onUp);
+  mini = { cleanup(){
+    clearInterval(iv);
+    pot.removeEventListener("pointerdown", onDown);
+    pot.removeEventListener("pointermove", onMove);
+    pot.removeEventListener("pointerup", onUp);
+    pot.removeEventListener("pointercancel", onUp);
+  } };
+}
+
+/* ================= WIRING ================= */
+$("btn-quit").addEventListener("click", () => { stopMini(); stopElapsed(); showScreen("screen-select"); });
+$("btn-replay").addEventListener("click", () => { if (currentDish) startDish(currentDish.id); });
+$("btn-menu").addEventListener("click", () => { stopMini(); stopElapsed(); showScreen("screen-select"); });
+renderSelect();
+</script>
+</body>
+</html>
